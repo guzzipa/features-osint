@@ -1,6 +1,6 @@
 # 🗺️ Roadmap - OSINT Feature Engineering
 
-**Estado Actual:** v2.0 funcionando, 78 features, publicado en GitHub
+**Estado Actual:** v3.0 funcionando, 130 features (78 OSINT + 52 Commercial APIs), publicado en GitHub
 **Última actualización:** 2026-03-13
 
 ---
@@ -603,9 +603,9 @@ Agregar en repo settings:
 ### 2. Shields.io Badges
 Agregar a README:
 ```markdown
-![GitHub stars](https://img.shields.io/github/stars/guzzipa/features-osint)
-![Code size](https://img.shields.io/github/languages/code-size/guzzipa/features-osint)
-![Last commit](https://img.shields.io/github/last-commit/guzzipa/features-osint)
+![GitHub stars](https://img.shields.io/github/stars/guzzipa/feature-generation-email)
+![Code size](https://img.shields.io/github/languages/code-size/guzzipa/feature-generation-email)
+![Last commit](https://img.shields.io/github/last-commit/guzzipa/feature-generation-email)
 ```
 
 ### 3. CONTRIBUTING.md
