@@ -1,0 +1,11 @@
+# Core dependencies (usando solo stdlib por ahora)
+# El script actual usa solo bibliotecas estándar de Python
+
+# Recomendadas para producción:
+# requests>=2.31.0        # HTTP requests más robustas que urllib
+# python-dotenv>=1.0.0    # Manejo de .env files
+# redis>=5.0.0            # Para caching
+# celery>=5.3.0           # Para procesamiento asíncrono
+# pydantic>=2.0.0         # Validación de datos
+# pytest>=7.4.0           # Testing
+# httpx>=0.25.0           # HTTP async client
