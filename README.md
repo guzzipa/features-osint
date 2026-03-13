@@ -1,16 +1,16 @@
-# 🔍 OSINT Feature Engineering for Credit Scoring
+# 🔍 Feature Generation from Email
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: clean](https://img.shields.io/badge/code%20style-clean-brightgreen.svg)](https://github.com/guzzipa/features-osint)
+[![Code style: clean](https://img.shields.io/badge/code%20style-clean-brightgreen.svg)](https://github.com/guzzipa/feature-generation-email)
 
-Sistema completo de enriquecimiento OSINT y feature engineering para scoring crediticio usando emails como punto de partida.
+Sistema completo de generación de features para ML y scoring crediticio usando emails como punto de partida. Combina datos públicos (OSINT) y APIs comerciales especializadas.
 
-> ⚡ **v2.0**: Ahora con 78+ features avanzados, detección de anomalías, análisis temporal y NLP
+> ⚡ **v3.0**: 103+ features de múltiples fuentes (GitHub, Gravatar, HIBP, Hunter.io, EmailRep.io, Clearbit)
 
 ## 🎯 Objetivo
 
-Generar features estructurados de ML para scoring crediticio basados en información pública (OSINT) obtenida a partir del email del usuario. Útil para:
+Generar features estructurados de ML para scoring crediticio combinando datos públicos (OSINT) y servicios comerciales especializados, usando el email del usuario como punto de entrada. Útil para:
 
 - **Scoring crediticio automatizado**
 - **Evaluación de riesgo**
@@ -46,10 +46,10 @@ python batch_processing.py email1@test.com email2@test.com email3@test.com
 ## 📂 Estructura del Proyecto
 
 ```
-features-osint/
-├── osint_email_enrichment.py       # Recolección OSINT de datos públicos
-├── ml_feature_engineering.py       # Feature engineering para ML
-├── example_ml_integration.py       # Integración ML y scoring crediticio
+feature-generation-email/
+├── osint_email_enrichment.py       # Recolección de datos públicos
+├── commercial_apis.py              # Integración Hunter.io, EmailRep, Clearbit
+├── advanced_feature_engineering.py # Feature engineering avanzado (103+ features)
 ├── batch_processing.py             # Procesamiento batch de múltiples usuarios
 ├── requirements.txt                # Dependencias Python
 ├── .env.example                    # Template variables de entorno
@@ -59,7 +59,19 @@ features-osint/
     └── example_output.json        # Output de ejemplo
 ```
 
-## 📊 Features ML Generados (30+ features)
+## 📊 Features ML Generados (103+ features)
+
+### 🌐 Fuentes de Datos
+
+1. **Datos Públicos (OSINT)**
+   - GitHub API - Perfil, repos, actividad
+   - Gravatar - Avatar, perfil público
+   - Have I Been Pwned - Brechas de seguridad
+
+2. **APIs Comerciales**
+   - Hunter.io - Verificación de email, datos corporativos
+   - EmailRep.io - Reputación y flags de seguridad
+   - Clearbit - Enriquecimiento empresarial y de persona
 
 ### 🔵 Identity Features
 - `account_age_days` / `account_age_years` - Antigüedad de cuenta digital
@@ -193,9 +205,14 @@ $ python example_ml_integration.py osint_results_guzzipa_at_gmail.com_ml_feature
 ### Variables de Entorno (.env)
 
 ```bash
-# APIs opcionales (mejoran rate limits)
+# APIs Públicas (opcional - mejoran rate limits)
 GITHUB_TOKEN=ghp_your_token_here        # 60 → 5000 req/hora
 HIBP_API_KEY=your_hibp_key_here         # Requerido para producción
+
+# APIs Comerciales (requeridas para v3.0)
+HUNTER_API_KEY=your_hunter_key          # hunter.io
+EMAILREP_API_KEY=your_emailrep_key      # emailrep.io
+CLEARBIT_API_KEY=your_clearbit_key      # clearbit.com
 
 # Configuración
 CACHE_TTL_DAYS=30
@@ -271,17 +288,17 @@ python batch_processing.py users.csv --email-col email --id-col user_id
 - [CLAUDE.md](CLAUDE.md) - Contexto completo del proyecto
 - [examples/](examples/) - Ejemplos de uso y outputs
 
-## 🛠️ Próximos Pasos
+## 🛠️ Roadmap
 
-1. ✅ Sistema base de enriquecimiento OSINT
-2. ✅ Feature engineering para ML
+1. ✅ Sistema base de enriquecimiento (datos públicos)
+2. ✅ Feature engineering avanzado (78 features)
 3. ✅ Integración con scoring crediticio
 4. ✅ Procesamiento batch
-5. 🔲 Agregar más fuentes: Hunter.io, Clearbit, EmailRep
+5. ✅ **v3.0**: Hunter.io, Clearbit, EmailRep (103+ features)
 6. 🔲 Implementar caching con Redis
 7. 🔲 API REST para servir features
 8. 🔲 Integración con feature stores (Feast, Tecton)
-9. 🔲 Dashboard de métricas
+9. 🔲 Dashboard interactivo (Streamlit)
 
 ## 📄 Licencia
 

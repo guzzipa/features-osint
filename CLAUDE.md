@@ -1,35 +1,40 @@
-# OSINT Feature Store Enrichment
+# Feature Generation from Email
 
 ## Descripción del Proyecto
 
-Sistema de enriquecimiento de feature store basado en OSINT (Open Source Intelligence) usando emails de usuarios como punto de partida. El objetivo es obtener información pública adicional para mejorar modelos de ML, scoring, y personalización.
+Sistema de generación de features para ML usando emails de usuarios como punto de partida. Combina datos públicos (OSINT) y APIs comerciales especializadas para obtener información estructurada que mejore modelos de scoring, predicción de riesgo y personalización.
 
 ## Estructura del Proyecto
 
 ```
-features-osint/
-├── CLAUDE.md              # Este archivo - contexto del proyecto
-├── osint_email_enrichment.py  # Script principal de enriquecimiento
-├── requirements.txt       # Dependencias Python
-├── .env.example          # Template de variables de entorno
-└── examples/             # Ejemplos de uso y resultados
+feature-generation-email/
+├── CLAUDE.md                       # Este archivo - contexto del proyecto
+├── osint_email_enrichment.py       # Recolección de datos públicos
+├── commercial_apis.py              # Integración APIs comerciales
+├── advanced_feature_engineering.py # Feature engineering (103+ features)
+├── requirements.txt                # Dependencias Python
+├── .env.example                    # Template de variables de entorno
+└── examples/                       # Ejemplos de uso y resultados
 ```
 
-## Fuentes de Datos OSINT
+## Fuentes de Datos
 
-### Implementadas
+### Datos Públicos (OSINT) - Implementados
 1. **Validación de Email** - Formato, tipo de proveedor, dominio
 2. **Gravatar** - Avatar y perfil público
 3. **GitHub** - Perfil, repos, actividad
 4. **Have I Been Pwned** - Brechas de seguridad
 5. **Domain Analysis** - Tipo de dominio, disposable detection
 
-### Por Implementar
-- Hunter.io - Información corporativa y verificación
-- EmailRep.io - Reputación del email
-- Clearbit - Enriquecimiento empresarial
+### APIs Comerciales - v3.0
+1. **Hunter.io** - Verificación deliverability, riesgo, datos corporativos
+2. **EmailRep.io** - Reputación, flags maliciosos, credential leaks
+3. **Clearbit** - Enriquecimiento empresa (funding, size, tech stack) y persona (role, seniority)
+
+### Por Implementar (futuro)
 - FullContact - Perfil social agregado
 - Lookup de redes sociales (LinkedIn, Twitter vía scraping)
+- Domain WHOIS age analysis
 
 ## Features Generados
 
@@ -94,10 +99,13 @@ El sistema genera un vector de features que incluye:
 ## Variables de Entorno
 
 ```bash
-# APIs (opcionales, mejoran resultados)
+# APIs Públicas (opcional - mejoran rate limits)
 GITHUB_TOKEN=          # Token de GitHub para mayor rate limit
 HIBP_API_KEY=          # API key de Have I Been Pwned
+
+# APIs Comerciales (v3.0 - requeridas para features completos)
 HUNTER_API_KEY=        # API key de Hunter.io
+EMAILREP_API_KEY=      # API key de EmailRep.io
 CLEARBIT_API_KEY=      # API key de Clearbit
 
 # Configuración
