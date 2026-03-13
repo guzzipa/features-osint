@@ -1,6 +1,12 @@
 # 🔍 OSINT Feature Engineering for Credit Scoring
 
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: clean](https://img.shields.io/badge/code%20style-clean-brightgreen.svg)](https://github.com/guzzipa/features-osint)
+
 Sistema completo de enriquecimiento OSINT y feature engineering para scoring crediticio usando emails como punto de partida.
+
+> ⚡ **v2.0**: Ahora con 78+ features avanzados, detección de anomalías, análisis temporal y NLP
 
 ## 🎯 Objetivo
 
