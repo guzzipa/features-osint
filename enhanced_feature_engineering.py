@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-Enhanced Feature Engineering with Commercial APIs + Additional Sources
-Extends advanced features (78) with commercial API data (+52) and additional sources (+72) = 202 total features
+Enhanced Feature Engineering with All Data Sources
+Extends advanced features (78) with all enrichment sources = 256 total features
 
 Combines:
 - Public OSINT data (GitHub, Gravatar, HIBP)
 - Commercial APIs (Hunter.io, EmailRep.io, Clearbit)
 - Additional Sources (WHOIS, IPQualityScore, Twitter, LinkedIn, StackOverflow)
+- Free Sources (IP Intel, Email Patterns, Username Search, Google Search)
 
-Version: 3.1.0
+Version: 3.2.0
 """
 
 from typing import Dict, Any, Optional
@@ -175,40 +176,100 @@ class EnhancedMLFeatures(AdvancedMLFeatures):
     twitter_professional_keywords: int  # Professional keywords in bio
     twitter_sentiment_score: float  # Sentiment analysis score
 
+    # ========== FREE SOURCES FEATURES (53) ==========
+    # IP Intelligence (15 features)
+    ip_country: Optional[str]  # IP country name
+    ip_country_code: Optional[str]  # ISO country code
+    ip_region: Optional[str]  # Region/state
+    ip_city: Optional[str]  # City
+    ip_postal_code: Optional[str]  # Postal/ZIP code
+    ip_latitude: Optional[float]  # Latitude
+    ip_longitude: Optional[float]  # Longitude
+    ip_timezone: Optional[str]  # Timezone
+    ip_utc_offset: Optional[str]  # UTC offset
+    ip_isp: Optional[str]  # Internet Service Provider
+    ip_asn: Optional[str]  # Autonomous System Number
+    ip_connection_type: str  # datacenter/mobile/vpn/residential/unknown
+    ip_is_eu: int  # Is in European Union
+    ip_continent: Optional[str]  # Continent code
+
+    # Email Pattern Analysis (20 features)
+    email_username_length: int  # Username length
+    email_has_full_name: int  # Has first + last name
+    email_has_first_name: int  # Has first name
+    email_has_last_name: int  # Has last name
+    email_name_parts_count: int  # Number of name parts
+    email_is_professional_pattern: int  # Follows professional pattern
+    email_is_random_pattern: int  # Appears randomly generated
+    email_has_separator: int  # Has separator (. _ -)
+    email_separator_type: Optional[str]  # Type of separator
+    email_separator_count: int  # Number of separators
+    email_has_numbers: int  # Contains numbers
+    email_numeric_ratio: float  # Ratio of numeric chars
+    email_numbers_count: int  # Count of number sequences
+    email_has_year: int  # Contains year (19xx or 20xx)
+    email_year_value: Optional[int]  # Extracted year value
+    email_age_from_year: Optional[int]  # Calculated age from year
+    email_entropy: float  # Shannon entropy (randomness)
+    email_is_role_account: int  # Is role/generic account
+    email_readability_score: float  # 0-1 readability score
+
+    # Username Search (10 features)
+    platforms_found_count: int  # Total platforms found
+    has_instagram: int  # Username on Instagram
+    has_youtube: int  # Username on YouTube
+    has_tiktok: int  # Username on TikTok
+    has_pinterest: int  # Username on Pinterest
+    has_reddit: int  # Username on Reddit
+    has_medium: int  # Username on Medium
+    has_spotify: int  # Username on Spotify
+    has_twitch: int  # Username on Twitch
+
+    # Google Search Presence (5 features)
+    google_search_has_results: int  # Email found in Google
+    google_linkedin_mention: int  # LinkedIn mentioned
+    google_github_mention: int  # GitHub mentioned
+    google_twitter_mention: int  # Twitter/X mentioned
+    google_search_count: int  # Total platform mentions
+
     # Version tracking
-    commercial_apis_version: str = "3.1.0"
-    additional_sources_version: str = "3.1.0"
+    commercial_apis_version: str = "3.2.0"
+    additional_sources_version: str = "3.2.0"
+    free_sources_version: str = "3.2.0"
 
 
 class EnhancedFeatureEngineer(AdvancedFeatureEngineer):
     """
-    Enhanced feature engineering combining OSINT + Commercial APIs + Additional Sources.
+    Enhanced feature engineering combining all data sources.
 
     Usage:
         # First collect all data
         osint_data = run_osint_enrichment(email)
         commercial_data = run_commercial_enrichment(email)
         additional_data = run_additional_enrichment(email)
+        free_data = run_free_enrichment(email, ip_address)
 
         # Combine and engineer features
-        engineer = EnhancedFeatureEngineer(osint_data, commercial_data, additional_data)
+        engineer = EnhancedFeatureEngineer(osint_data, commercial_data, additional_data, free_data)
         features = engineer.generate_all_features()
     """
 
-    FEATURE_VERSION = "3.1.0"
+    FEATURE_VERSION = "3.2.0"
 
-    def __init__(self, osint_data: Dict[str, Any], commercial_data: Optional[Dict[str, Any]] = None, additional_data: Optional[Dict[str, Any]] = None):
+    def __init__(self, osint_data: Dict[str, Any], commercial_data: Optional[Dict[str, Any]] = None, additional_data: Optional[Dict[str, Any]] = None, free_data: Optional[Dict[str, Any]] = None):
         """
-        Initialize with OSINT, commercial API, and additional sources data.
+        Initialize with OSINT, commercial API, additional sources, and free sources data.
 
         Args:
             osint_data: Output from osint_email_enrichment.py
             commercial_data: Output from commercial_apis.py (optional)
             additional_data: Output from additional_sources.py (optional)
+            free_data: Output from free_sources.py (optional)
         """
         super().__init__(osint_data)
         self.commercial = commercial_data or {}
         self.additional = additional_data or {}
+        self.free = free_data or {}
 
     def _extract_hunter_features(self) -> Dict[str, Any]:
         """Extract features from Hunter.io data."""
@@ -479,9 +540,82 @@ class EnhancedFeatureEngineer(AdvancedFeatureEngineer):
             'identity_cross_validation_score': round(identity_score, 3),
         }
 
+    def _extract_free_features(self) -> Dict[str, Any]:
+        """Extract features from free sources (IP Intel, Email Patterns, Username Search, Google Search)."""
+        # IP Intelligence (15 features)
+        ip_features = {
+            'ip_country': self.free.get('ip_country'),
+            'ip_country_code': self.free.get('ip_country_code'),
+            'ip_region': self.free.get('ip_region'),
+            'ip_city': self.free.get('ip_city'),
+            'ip_postal_code': self.free.get('ip_postal_code'),
+            'ip_latitude': self.free.get('ip_latitude'),
+            'ip_longitude': self.free.get('ip_longitude'),
+            'ip_timezone': self.free.get('ip_timezone'),
+            'ip_utc_offset': self.free.get('ip_utc_offset'),
+            'ip_isp': self.free.get('ip_isp'),
+            'ip_asn': self.free.get('ip_asn'),
+            'ip_connection_type': self.free.get('ip_connection_type', 'unknown'),
+            'ip_is_eu': 1 if self.free.get('ip_is_eu') else 0,
+            'ip_continent': self.free.get('ip_continent'),
+        }
+
+        # Email Pattern Analysis (20 features)
+        email_pattern_features = {
+            'email_username_length': self.free.get('email_username_length', 0),
+            'email_has_full_name': 1 if self.free.get('email_has_full_name') else 0,
+            'email_has_first_name': 1 if self.free.get('email_has_first_name') else 0,
+            'email_has_last_name': 1 if self.free.get('email_has_last_name') else 0,
+            'email_name_parts_count': self.free.get('email_name_parts_count', 0),
+            'email_is_professional_pattern': 1 if self.free.get('email_is_professional_pattern') else 0,
+            'email_is_random_pattern': 1 if self.free.get('email_is_random_pattern') else 0,
+            'email_has_separator': 1 if self.free.get('email_has_separator') else 0,
+            'email_separator_type': self.free.get('email_separator_type'),
+            'email_separator_count': self.free.get('email_separator_count', 0),
+            'email_has_numbers': 1 if self.free.get('email_has_numbers') else 0,
+            'email_numeric_ratio': self.free.get('email_numeric_ratio', 0.0),
+            'email_numbers_count': self.free.get('email_numbers_count', 0),
+            'email_has_year': 1 if self.free.get('email_has_year') else 0,
+            'email_year_value': self.free.get('email_year_value'),
+            'email_age_from_year': self.free.get('email_age_from_year'),
+            'email_entropy': self.free.get('email_entropy', 0.0),
+            'email_is_role_account': 1 if self.free.get('email_is_role_account') else 0,
+            'email_readability_score': self.free.get('email_readability_score', 0.5),
+        }
+
+        # Username Search (10 features)
+        username_features = {
+            'platforms_found_count': self.free.get('platforms_found_count', 0),
+            'has_instagram': 1 if self.free.get('has_instagram') else 0,
+            'has_youtube': 1 if self.free.get('has_youtube') else 0,
+            'has_tiktok': 1 if self.free.get('has_tiktok') else 0,
+            'has_pinterest': 1 if self.free.get('has_pinterest') else 0,
+            'has_reddit': 1 if self.free.get('has_reddit') else 0,
+            'has_medium': 1 if self.free.get('has_medium') else 0,
+            'has_spotify': 1 if self.free.get('has_spotify') else 0,
+            'has_twitch': 1 if self.free.get('has_twitch') else 0,
+        }
+
+        # Google Search Presence (5 features)
+        google_features = {
+            'google_search_has_results': 1 if self.free.get('google_search_has_results') else 0,
+            'google_linkedin_mention': 1 if self.free.get('google_linkedin_mention') else 0,
+            'google_github_mention': 1 if self.free.get('google_github_mention') else 0,
+            'google_twitter_mention': 1 if self.free.get('google_twitter_mention') else 0,
+            'google_search_count': self.free.get('google_search_count', 0),
+        }
+
+        # Combine all free features
+        return {
+            **ip_features,
+            **email_pattern_features,
+            **username_features,
+            **google_features,
+        }
+
     def generate_all_features(self) -> EnhancedMLFeatures:
         """
-        Generate all 202 features combining OSINT + Commercial APIs + Additional Sources.
+        Generate all 256 features combining OSINT + Commercial APIs + Additional Sources + Free Sources.
 
         Returns:
             EnhancedMLFeatures dataclass with all features
@@ -499,6 +633,9 @@ class EnhancedFeatureEngineer(AdvancedFeatureEngineer):
         # Extract additional sources features
         additional_features = self._extract_additional_features()
 
+        # Extract free sources features
+        free_features = self._extract_free_features()
+
         # Combine all features
         all_features = {
             **base_dict,
@@ -507,8 +644,10 @@ class EnhancedFeatureEngineer(AdvancedFeatureEngineer):
             **clearbit_features,
             **cross_validation,
             **additional_features,
+            **free_features,
             'commercial_apis_version': self.FEATURE_VERSION,
             'additional_sources_version': self.FEATURE_VERSION,
+            'free_sources_version': self.FEATURE_VERSION,
             'feature_version': self.FEATURE_VERSION,  # Override parent version
         }
 
