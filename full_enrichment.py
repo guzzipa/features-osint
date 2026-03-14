@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 """
-Full End-to-End Email Enrichment Pipeline (v3.1)
+Full End-to-End Email Enrichment Pipeline (v3.2)
 
 Combines:
 1. OSINT data collection (GitHub, Gravatar, HIBP)
 2. Commercial API enrichment (Hunter.io, EmailRep.io, Clearbit)
 3. Additional sources (WHOIS, IPQualityScore, Twitter, LinkedIn, StackOverflow)
-4. Enhanced feature engineering (202 features)
+4. Free sources (IP Intel, Email Patterns, Username Search, Google Search)
+5. Enhanced feature engineering (250+ features)
 
 Usage:
     python full_enrichment.py email@example.com
-    python full_enrichment.py email@example.com --skip-commercial  # OSINT only
+    python full_enrichment.py email@example.com --skip-commercial  # OSINT + Free only
     python full_enrichment.py email@example.com --skip-additional  # Skip WHOIS/IPQS/etc
+    python full_enrichment.py email@example.com --ip 181.45.123.45  # With IP geolocation
     python full_enrichment.py email@example.com --output results/
 
 Author: Feature Generation Email
-Version: 3.1.0
+Version: 3.2.0
 """
 
 import sys
@@ -30,6 +32,7 @@ try:
     from osint_email_enrichment import EmailOSINT
     from commercial_apis import CommercialAPIsEnricher
     from additional_sources import AdditionalSourcesEnricher
+    from free_sources import FreeSourcesEnricher
     from enhanced_feature_engineering import EnhancedFeatureEngineer
 except ImportError as e:
     print(f"❌ Import error: {e}")
@@ -49,9 +52,9 @@ class FullEnrichmentPipeline:
     Complete enrichment pipeline combining all data sources.
     """
 
-    VERSION = "3.1.0"
+    VERSION = "3.2.0"
 
-    def __init__(self, output_dir: str = "results", skip_commercial: bool = False, skip_additional: bool = False):
+    def __init__(self, output_dir: str = "results", skip_commercial: bool = False, skip_additional: bool = False, ip_address: str = None):
         """
         Initialize pipeline.
 
@@ -59,11 +62,13 @@ class FullEnrichmentPipeline:
             output_dir: Directory to save results
             skip_commercial: Skip commercial APIs (Hunter, EmailRep, Clearbit)
             skip_additional: Skip additional sources (WHOIS, IPQS, Twitter, etc)
+            ip_address: Optional IP address for geolocation (free sources)
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
         self.skip_commercial = skip_commercial
         self.skip_additional = skip_additional
+        self.ip_address = ip_address
 
         if not skip_commercial:
             self.commercial = CommercialAPIsEnricher()
@@ -76,6 +81,9 @@ class FullEnrichmentPipeline:
         else:
             self.additional = None
             logger.warning("Additional sources disabled")
+
+        # Free sources - always enabled (100% free)
+        self.free_sources = FreeSourcesEnricher(ip_address=ip_address)
 
     def enrich_email(self, email: str) -> dict:
         """
@@ -90,14 +98,14 @@ class FullEnrichmentPipeline:
         logger.info(f"🚀 Starting full enrichment for: {email}")
 
         # Step 1: OSINT Data Collection
-        logger.info("📊 Step 1/4: Collecting OSINT data...")
+        logger.info("📊 Step 1/5: Collecting OSINT data...")
         osint_enricher = EmailOSINT(email)
         osint_data = osint_enricher.enrich()
 
         # Step 2: Commercial API Enrichment (optional)
         commercial_data = None
         if not self.skip_commercial and self.commercial:
-            logger.info("💼 Step 2/4: Enriching with commercial APIs...")
+            logger.info("💼 Step 2/5: Enriching with commercial APIs...")
             try:
                 commercial_data = self.commercial.enrich_email(email)
             except Exception as e:
@@ -107,15 +115,24 @@ class FullEnrichmentPipeline:
         # Step 3: Additional Sources (optional)
         additional_data = None
         if not self.skip_additional and self.additional:
-            logger.info("🌐 Step 3/4: Enriching with additional sources...")
+            logger.info("🌐 Step 3/5: Enriching with additional sources...")
             try:
                 additional_data = self.additional.enrich_email(email)
             except Exception as e:
                 logger.error(f"Additional sources error: {e}")
                 logger.warning("Continuing without additional sources")
 
-        # Step 4: Feature Engineering
-        logger.info("🔬 Step 4/4: Generating enhanced features...")
+        # Step 4: Free Sources (always enabled - 100% free)
+        logger.info("🆓 Step 4/5: Enriching with free sources...")
+        free_data = None
+        try:
+            free_data = self.free_sources.enrich_email(email, ip_address=self.ip_address)
+        except Exception as e:
+            logger.error(f"Free sources error: {e}")
+            logger.warning("Continuing without free sources")
+
+        # Step 5: Feature Engineering
+        logger.info("🔬 Step 5/5: Generating enhanced features...")
         engineer = EnhancedFeatureEngineer(osint_data, commercial_data, additional_data)
         features = engineer.generate_all_features()
         ml_ready = engineer.to_ml_ready()
@@ -129,6 +146,7 @@ class FullEnrichmentPipeline:
                 'osint': osint_data,
                 'commercial': commercial_data if commercial_data else {},
                 'additional': additional_data if additional_data else {},
+                'free_sources': free_data if free_data else {},
             },
             'features': {
                 'all_features': features.__dict__,
@@ -271,6 +289,16 @@ def main():
         help='Skip commercial APIs (OSINT only)'
     )
     parser.add_argument(
+        '--skip-additional',
+        action='store_true',
+        help='Skip additional sources (WHOIS, IPQS, Twitter, etc)'
+    )
+    parser.add_argument(
+        '--ip',
+        type=str,
+        help='IP address for geolocation (free sources)'
+    )
+    parser.add_argument(
         '--quiet',
         action='store_true',
         help='Suppress summary output'
@@ -287,7 +315,9 @@ def main():
     try:
         pipeline = FullEnrichmentPipeline(
             output_dir=args.output,
-            skip_commercial=args.skip_commercial
+            skip_commercial=args.skip_commercial,
+            skip_additional=args.skip_additional,
+            ip_address=args.ip
         )
 
         results = pipeline.enrich_email(args.email)
